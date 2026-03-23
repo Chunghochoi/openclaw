@@ -104,11 +104,15 @@ async function callLLM(session, userMessage) {
 
     const payload = {
         model: currentModel,
-        messages: messages,
-        tools: getToolsSchema(),
-        tool_choice: 'auto'
+        messages: messages
     };
 
+    // Chỉ bật Tools (Web/Weather) khi ở chế độ Chat thường.
+    // Tắt Tools ở chế độ Codex vì các model Uncensored/Open-source thường không hỗ trợ.
+    if (!isCodex) {
+        payload.tools = getToolsSchema();
+        payload.tool_choice = 'auto';
+    }
     try {
         let response = await axios.post(process.env.OPENROUTER_BASE_URL, payload, {
             headers: {
